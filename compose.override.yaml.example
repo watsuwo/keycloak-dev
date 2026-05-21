@@ -1,0 +1,19 @@
+# 個人カスタマイズ用テンプレート
+# cp compose.override.yaml.example compose.override.yaml で利用開始
+# compose.override.yaml はgit管理外
+#
+# Docker Composeは compose.yaml と compose.override.yaml を自動マージするため
+# 個人で必要な変更 (デバッグポート、追加マウント、リソース上限など) はここに書く
+
+services:
+  keycloak:
+    # JVM リモートデバッグを有効化したい場合
+    # environment:
+    #   DEBUG: "true"
+    #   DEBUG_PORT: "*:8787"
+    # ports:
+    #   - "8787:8787"
+
+    # 個人ブランチのprovidersをサブパスでマウントしたい場合の例
+    # volumes:
+    #   - ./providers-experimental:/opt/keycloak/providers/experimental:ro

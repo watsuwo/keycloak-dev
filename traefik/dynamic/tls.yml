@@ -1,0 +1,12 @@
+# Traefik 動的設定: TLS証明書の登録
+# certs/ 配下の自己署名証明書をデフォルト証明書として利用
+
+tls:
+  certificates:
+    - certFile: /certs/local-cert.pem
+      keyFile: /certs/local-key.pem
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/local-cert.pem
+        keyFile: /certs/local-key.pem

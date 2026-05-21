@@ -1,0 +1,36 @@
+# 環境変数・個人override
+.env
+.env.local
+compose.override.yaml
+
+# 自己署名証明書 (make certs で生成)
+certs/*.pem
+certs/*.key
+
+# Claude Code 個人設定
+.claude/settings.local.json
+.claude/projects/
+
+# ビルド成果物 (Maven/Gradle)
+target/
+build/
+*.class
+*.jar
+!**/lib/*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (Theme開発でnpm使う場合)
+node_modules/
+dist/
+
+# Realm export時の一時ファイル
+realms/*.tmp.json

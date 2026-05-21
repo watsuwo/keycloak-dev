@@ -1,0 +1,30 @@
+# Traefik 静的設定 (起動時に読み込まれる)
+
+api:
+  dashboard: true
+  insecure: true   # 開発用: localhost:8081 で認証なしダッシュボード公開
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: false
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: keycloak-net
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+log:
+  level: INFO
+
+accessLog: {}

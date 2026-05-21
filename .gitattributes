@@ -1,0 +1,29 @@
+# WSL2/Windows/Mac/Linux混在対応: テキストはLFで統一
+* text=auto eol=lf
+
+# シェルスクリプト・dotfileは明示的にLF
+*.sh        text eol=lf
+*.bash      text eol=lf
+Makefile    text eol=lf
+Dockerfile  text eol=lf
+
+# Windowsスクリプトのみ CRLF
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Keycloakテンプレート・設定はLF
+*.ftl       text eol=lf
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.properties text eol=lf
+
+# バイナリ
+*.png       binary
+*.jpg       binary
+*.gif       binary
+*.ico       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
