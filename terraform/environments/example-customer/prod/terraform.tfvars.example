@@ -1,0 +1,4 @@
+keycloak_url               = "https://keycloak.example.com"
+keycloak_admin_password    = "REPLACE_ME_BEFORE_APPLY"
+web_app_client_secret      = "REPLACE_ME_BEFORE_APPLY"
+batch_worker_client_secret = "REPLACE_ME_BEFORE_APPLY"

@@ -1,0 +1,4 @@
+keycloak_url               = "https://keycloak.localtest.me"
+keycloak_admin_password    = "admin"
+web_app_client_secret      = "dev-dummy-secret-web-app"
+batch_worker_client_secret = "dev-dummy-secret-batch-worker"
