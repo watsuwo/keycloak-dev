@@ -91,6 +91,12 @@ clean: ## 全サービス停止 + ボリューム削除 (DBデータも消える
 pull: ## イメージを最新に更新
 	$(DC) pull
 
+# --- テスト ---
+
+.PHONY: test-kc
+test-kc: ## Keycloak設定値を自動検証 (terraform apply後に実行)
+	@python3 scripts/test-realm-config.py
+
 # --- 以下、Phase 3 で実装予定 ---
 
 .PHONY: build-providers
