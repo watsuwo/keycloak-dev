@@ -4,8 +4,25 @@
 compose.override.yaml
 
 # 自己署名証明書 (make certs で生成)
-certs/*.pem
-certs/*.key
+traefik/certs/*.pem
+traefik/certs/*.key
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/terraform.tfvars
+!**/terraform.tfvars.example
+crash.log
+crash.*.log
+
+# Playwright / E2E
+e2e-tests/node_modules/
+e2e-tests/test-results/
+e2e-tests/playwright-report/
+e2e-tests/playwright/.cache/
+e2e-tests/dist/
 
 # Claude Code 個人設定
 .claude/settings.local.json
