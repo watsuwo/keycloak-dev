@@ -110,5 +110,5 @@ cd e2e-tests && npm run test:headed
 ## 関連
 
 - Java IT (Direct Grant): [keycloak/providers/integration-tests/CLAUDE.md](../keycloak/providers/integration-tests/CLAUDE.md)
-- Authenticator実装: [keycloak/providers/01-email-domain-allowlist/CLAUDE.md](../keycloak/providers/01-email-domain-allowlist/CLAUDE.md)
+- Authenticator実装: [keycloak/providers/sample-01-email-domain-allowlist/CLAUDE.md](../keycloak/providers/sample-01-email-domain-allowlist/CLAUDE.md)
 - パターンレシピ: [docs/specs/patterns/01-email-domain-allowlist.md](../docs/specs/patterns/01-email-domain-allowlist.md)

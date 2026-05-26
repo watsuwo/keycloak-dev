@@ -174,7 +174,7 @@ Mockito 5.11 では JDK 24/25 で `Could not modify all classes` エラーが出
 - Keycloak内部のフロー判定APIに依存 (`realm.getDirectGrantFlow()`)
 - 別のフロー (reset-credentials等) で動かす場合は判定ロジック拡張が必要
 
-実装: [keycloak/providers/01-email-domain-allowlist/src/main/java/.../EmailDomainAllowlistAuthenticator.java](../keycloak/providers/01-email-domain-allowlist/src/main/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticator.java) `isDirectGrantFlow()` メソッド
+実装: [keycloak/providers/sample-01-email-domain-allowlist/src/main/java/.../EmailDomainAllowlistAuthenticator.java](../keycloak/providers/sample-01-email-domain-allowlist/src/main/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticator.java) `isDirectGrantFlow()` メソッド
 
 ---
 

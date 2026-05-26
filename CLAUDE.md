@@ -86,7 +86,8 @@ keycloak-dev/
 ├── keycloak/providers/                   # SPI実装 (Java / Maven multi-module)
 │   ├── pom.xml                  # 親POM
 │   ├── CLAUDE.md                # SPI開発の流儀
-│   └── 0N-<pattern>/            # 各パターン (Authenticator/EventListener/etc.)
+│   ├── sample-NN-<pattern>/     # 汎用パターン (Authenticator/EventListener/etc.)
+│   └── case-<client>-<name>/   # 案件固有実装
 ├── keycloak/themes/                      # FreeMarker/CSS/JS — Phase 2.x で本格整備
 ├── keycloak/realms/                      # Realm JSON (起動時にimport) — Phase 2.x で本格整備
 ├── docs/                        # 業務プロセスドキュメント
@@ -108,7 +109,7 @@ keycloak-dev/
 
 | 層 | ディレクトリ | 守備範囲 | コマンド |
 | --- | --- | --- | --- |
-| 単体テスト | `keycloak/providers/0N-*/src/test/` | ロジック分岐 (Mockito) | `make test-providers` |
+| 単体テスト | `keycloak/providers/sample-*/src/test/` `case-*/src/test/` | ロジック分岐 (Mockito) | `make test-providers` |
 | Java IT | `keycloak/providers/integration-tests/` | Direct Grant等API挙動 | `make test-integration` |
 | ブラウザE2E | `e2e-tests/` | ブラウザ画面・Auth Code Flow・Themes | `make test-e2e` |
 

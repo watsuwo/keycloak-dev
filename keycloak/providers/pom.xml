@@ -30,7 +30,7 @@
     </properties>
 
     <modules>
-        <module>01-email-domain-allowlist</module>
+        <module>sample-01-email-domain-allowlist</module>
         <module>integration-tests</module>
     </modules>
 

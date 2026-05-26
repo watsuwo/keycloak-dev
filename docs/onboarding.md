@@ -69,7 +69,7 @@
    make test-e2e             # ブラウザE2E (~30-60秒)
    ```
 3. **何をテストしているか確認**
-   - 単体テスト: [keycloak/providers/01-email-domain-allowlist/src/test/java/.../EmailDomainAllowlistAuthenticatorTest.java](../keycloak/providers/01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java) を読む
+   - 単体テスト: [keycloak/providers/sample-01-email-domain-allowlist/src/test/java/.../EmailDomainAllowlistAuthenticatorTest.java](../keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java) を読む
    - Java IT: [keycloak/providers/integration-tests/src/test/java/.../EmailDomainAllowlistIT.java](../keycloak/providers/integration-tests/src/test/java/com/example/keycloak/it/EmailDomainAllowlistIT.java) を読む
    - E2E: [e2e-tests/tests/email-domain-allowlist-browser.spec.ts](../e2e-tests/tests/email-domain-allowlist-browser.spec.ts) を読む
 4. **E2E ヘッドフルで実行** (実画面を見る)
@@ -96,7 +96,7 @@
 
 1. **パターン1の解説を読む**
    - [docs/specs/patterns/01-email-domain-allowlist.md](patterns/01-email-domain-allowlist.md) — レシピ
-   - [keycloak/providers/01-email-domain-allowlist/CLAUDE.md](../keycloak/providers/01-email-domain-allowlist/CLAUDE.md) — パターン解説
+   - [keycloak/providers/sample-01-email-domain-allowlist/CLAUDE.md](../keycloak/providers/sample-01-email-domain-allowlist/CLAUDE.md) — パターン解説
 2. **コードを順に読む**
    - `EmailDomainAllowlistAuthenticatorFactory.java` (SPI登録、設定UI定義)
    - `EmailDomainAllowlistAuthenticator.java` (判定ロジック、フロー検出)
@@ -141,7 +141,7 @@
 
 許可リストではなく「指定ドメインを拒否」する逆動作のパターンを作る。
 
-1. `keycloak/providers/02-email-domain-blocklist/` を `01-email-domain-allowlist/` から複製
+1. `keycloak/providers/sample-02-email-domain-blocklist/` を `sample-01-email-domain-allowlist/` から複製
 2. クラス名・パッケージ・Factory ID をリネーム
 3. 判定ロジックを反転 (一致したら拒否)
 4. テスト3層すべて追加
