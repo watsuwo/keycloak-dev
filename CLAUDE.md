@@ -101,6 +101,20 @@ keycloak-dev/
 | 証明書再生成 (BASE_DOMAIN変更時) | `make certs-regen && make restart-traefik` |
 | バージョンアップ | `.env` のバージョン変更 → `make pull && make up` |
 
+### テスト
+
+| やりたいこと | 操作 | Keycloak 要否 |
+| --- | --- | --- |
+| Spec markdown の静的検証 | `make test-spec` | 不要 |
+| Terraform 構文・型チェック | `make test-tf` | 不要 |
+| Keycloak 設定値の検証 | `make test-kc` | 必要 |
+| OAuth フロー動作確認 | `make test-oauth` | 必要 |
+| 全テストまとめて実行 | `make test` | 必要 |
+
+`make test-kc` / `make test-oauth` は `make up && terraform apply` 後に実行する。  
+`KEYCLOAK_ENV=stg make test-kc` で stg 環境の設定値を検証できる。  
+batch-worker の Client Credentials テストは `KC_BATCH_WORKER_SECRET=xxx make test-oauth` で有効化。
+
 ## TLS / 証明書
 
 - `make certs` で `certs/local-cert.pem` と `certs/local-key.pem` を生成 (`make init` / `make up` から自動呼出)。
@@ -140,10 +154,10 @@ Mailhogを使う場合、Realm > Email設定で:
 ## Phaseロードマップ
 
 - [x] **Phase 1** : 最小で動くdocker-compose基盤
-- [x] **Phase 1.5** : Traefik + 自己署名証明書でHTTPSアクセス ←いまここ
+- [x] **Phase 1.5** : Traefik + 自己署名証明書でHTTPSアクセス
 - [ ] **Phase 2** : ディレクトリ中身の整備 (providers/themes/realms にサンプルとCLAUDE.md)
 - [ ] **Phase 3** : 開発フロー整備 (SPIビルド、Themeホットリロード、Realm export/import)
-- [ ] **Phase 4** : Claude活用の仕組み強化 (テンプレ化、CIチェック)
+- [x] **Phase 4** : テスト自動化 (L1 spec検証・L2 terraform validate・L3 Admin API検証・L4 OAuthフロー確認) ←いまここ
 
 ## トラブルシューティング
 

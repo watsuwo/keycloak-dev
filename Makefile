@@ -94,7 +94,11 @@ pull: ## イメージを最新に更新
 # --- テスト ---
 
 .PHONY: test
-test: test-tf test-kc ## 全テストを実行 (test-tf → test-kc)
+test: test-spec test-tf test-kc test-oauth ## 全テストを実行 (spec → tf → kc → oauth)
+
+.PHONY: test-spec
+test-spec: ## Spec markdown の静的検証 (frontmatter・YAMLブロック確認)
+	@python3 scripts/test-spec.py
 
 .PHONY: test-tf
 test-tf: ## Terraform 構文・型チェック (全 environment)
@@ -102,8 +106,12 @@ test-tf: ## Terraform 構文・型チェック (全 environment)
 	@bash scripts/test-terraform.sh
 
 .PHONY: test-kc
-test-kc: ## Keycloak設定値を自動検証 (terraform apply後に実行)
+test-kc: ## Keycloak設定値を自動検証 — spec と Admin API を突合 (terraform apply後に実行)
 	@python3 scripts/test-realm-config.py
+
+.PHONY: test-oauth
+test-oauth: ## OAuth フロー動作確認 (OIDC discovery・ROPC拒否・Client Credentials)
+	@python3 scripts/test-oauth-flows.py
 
 # --- 以下、Phase 3 で実装予定 ---
 
