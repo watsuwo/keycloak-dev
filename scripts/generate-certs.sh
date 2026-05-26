@@ -14,7 +14,7 @@ if [ -f .env ]; then
 fi
 
 BASE_DOMAIN="${BASE_DOMAIN:-localtest.me}"
-CERT_DIR="certs"
+CERT_DIR="traefik/certs"
 CERT_FILE="${CERT_DIR}/local-cert.pem"
 KEY_FILE="${CERT_DIR}/local-key.pem"
 

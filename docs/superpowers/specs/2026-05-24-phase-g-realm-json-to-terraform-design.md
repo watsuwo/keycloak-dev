@@ -90,11 +90,7 @@ env:
 - 実値は `terraform.tfvars` (gitignore) で env 別に注入
 - `terraform.tfvars.example` には **形だけ** (ダミー値) を示す
 
-### 5. ssl_required
-
-`keycloak_realm.this.ssl_required` は **全 env で `"external"` 固定**。dev も Traefik 経由 HTTPS なので問題なし。
-
-### 6. terraform ディレクトリ構造
+### 5. terraform ディレクトリ構造
 
 ```
 terraform/

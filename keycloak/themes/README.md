@@ -1,4 +1,4 @@
-# themes/
+# keycloak/themes/
 
 Keycloakの **テーマ** (FreeMarkerテンプレート + CSS/JS + メッセージ) を配置する。`compose.yaml` で `/opt/keycloak/themes/` にマウントされる。
 

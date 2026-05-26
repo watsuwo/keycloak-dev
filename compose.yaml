@@ -13,7 +13,7 @@ services:
     volumes:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
-      - ./certs:/certs:ro
+      - ./traefik/certs:/certs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - keycloak-net
@@ -63,9 +63,9 @@ services:
       KC_SPI_THEME_CACHE_THEMES: "false"
       KC_SPI_THEME_CACHE_TEMPLATES: "false"
     volumes:
-      - ./providers:/opt/keycloak/providers:ro
-      - ./themes:/opt/keycloak/themes:ro
-      - ./realms:/opt/keycloak/data/import:ro
+      - ./keycloak/providers:/opt/keycloak/providers:ro
+      - ./keycloak/themes:/opt/keycloak/themes:ro
+      - ./keycloak/realms:/opt/keycloak/data/import:ro
     ports:
       # mgmt(健康/メトリクス)のみ直接公開。HTTP(8080)はTraefik経由
       - "${KC_MGMT_PORT:-9000}:9000"

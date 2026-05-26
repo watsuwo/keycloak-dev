@@ -1,0 +1,21 @@
+# Build context = keycloak/ ディレクトリ。ここから除外するファイル。
+
+# Dockerfile自身 (build context に含める必要なし)
+Dockerfile
+.dockerignore
+
+# ドキュメント (イメージ内では不要)
+**/CLAUDE.md
+**/README.md
+
+# Maven ビルド成果物 (ステージ1で再生成される)
+providers/**/target/
+providers/*.jar
+providers/.github/
+
+# IDE / OS
+**/.idea/
+**/.vscode/
+**/*.iml
+.DS_Store
+Thumbs.db

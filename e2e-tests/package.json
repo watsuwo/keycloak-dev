@@ -1,0 +1,24 @@
+{
+  "name": "keycloak-dev-e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser E2E tests using Playwright + Testcontainers for Keycloak SPI/Theme verification",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "HEADED=true playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "install:browsers": "playwright install chromium",
+    "show-report": "playwright show-report",
+    "trace": "playwright show-trace"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "@types/node": "^20.11.0",
+    "glob": "^10.3.0",
+    "testcontainers": "^10.7.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
