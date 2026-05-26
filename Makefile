@@ -93,6 +93,14 @@ pull: ## イメージを最新に更新
 
 # --- テスト ---
 
+.PHONY: test
+test: test-tf test-kc ## 全テストを実行 (test-tf → test-kc)
+
+.PHONY: test-tf
+test-tf: ## Terraform 構文・型チェック (全 environment)
+	@command -v terraform >/dev/null 2>&1 || { echo "terraform CLI が必要: brew install terraform / apt install terraform"; exit 1; }
+	@bash scripts/test-terraform.sh
+
 .PHONY: test-kc
 test-kc: ## Keycloak設定値を自動検証 (terraform apply後に実行)
 	@python3 scripts/test-realm-config.py
