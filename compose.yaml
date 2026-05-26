@@ -38,6 +38,12 @@ services:
     restart: unless-stopped
 
   keycloak:
+    build:
+      context: .
+      args:
+        KEYCLOAK_VERSION: ${KEYCLOAK_VERSION:-26.0}
+    # image: を指定することで docker compose build 後も同じ名前で参照できる。
+    # 未ビルドの場合は Docker Hub からプルされる (ローカル開発はこれで十分)。
     image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION:-26.0}
     container_name: keycloak
     command:

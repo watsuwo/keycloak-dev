@@ -37,6 +37,10 @@ certs-regen: ## 証明書を強制再生成 (BASE_DOMAIN変更時)
 
 # --- 起動・停止 ---
 
+.PHONY: build
+build: ## カスタム Keycloak イメージをビルド (providers/themes を組み込み)
+	$(DC) build keycloak
+
 .PHONY: up
 up: .env certs ## 全サービスを起動 (バックグラウンド)
 	$(DC) up -d

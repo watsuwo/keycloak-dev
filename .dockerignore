@@ -1,0 +1,30 @@
+# Git
+.git
+.gitattributes
+.gitignore
+
+# シークレット・ローカル設定
+.env
+.env.*
+certs/
+
+# Terraform (secrets を含む可能性あり)
+terraform/
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfvars
+
+# 開発ツール・ドキュメント
+docs/
+scripts/
+traefik/
+Makefile
+.claude/
+
+# Compose 設定 (ランタイム不要)
+compose*.yaml
+
+# テスト成果物
+**/__pycache__/
+**/*.pyc
