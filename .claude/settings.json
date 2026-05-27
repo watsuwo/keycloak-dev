@@ -24,8 +24,14 @@
       "Bash(git branch:*)",
       "Bash(git show:*)",
       "Bash(mvn -v)",
-      "Bash(mvn --version)"
+      "Bash(mvn --version)",
+      "Bash(python3 scripts/validate-specs.py:*)",
+      "Bash(make spec-validate)",
+      "Bash(make spec-validate-quiet)"
     ],
     "deny": []
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
   }
 }

@@ -4,8 +4,8 @@
 
 ## 予定しているスクリプト
 
-- `export-realm.sh` — 稼働中Realmを `realms/` 配下にJSONエクスポート (秘匿情報マスキング込み)
-- `build-providers.sh` — `providers/` 配下のMavenモジュールを一括ビルド
+- `export-realm.sh` — 稼働中Realmを `keycloak/realms/` 配下にJSONエクスポート (秘匿情報マスキング込み)
+- `build-providers.sh` — `keycloak/providers/` 配下のMavenモジュールを一括ビルド
 - `wait-for-keycloak.sh` — Keycloakのhealth/readyを待機 (CI用)
 - `dev-reset.sh` — 開発DB初期化 + 最小Realm再投入
 

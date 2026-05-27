@@ -1,4 +1,4 @@
-# realms/
+# keycloak/realms/
 
 Keycloakの **Realm設定JSON** を配置する。`compose.yaml` で `/opt/keycloak/data/import/` にマウントされ、起動時に `--import-realm` で自動インポートされる。
 

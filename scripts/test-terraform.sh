@@ -1,48 +1,99 @@
 #!/usr/bin/env bash
-# terraform/environments/*/* 全ディレクトリで terraform validate を実行する。
-# 前提: terraform CLI がインストールされていること。
+# サンプル案件の Terraform を apply → 検証 → destroy のローテーション
+# 前提: dev Keycloak が起動中 (make up)
+
 set -euo pipefail
 
-G="\033[92m"; R="\033[91m"; B="\033[1m"; Z="\033[0m"
+cd "$(dirname "$0")/.."
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PASS=0; FAIL=0
+TF_DIR="terraform/environments/example-customer"
 
-mapfile -t ENV_DIRS < <(find "$REPO_ROOT/terraform/environments" -mindepth 2 -maxdepth 2 -type d | sort)
+# --- 前提チェック ---
 
-if [ ${#ENV_DIRS[@]} -eq 0 ]; then
-  echo "テスト対象の environment ディレクトリが見つかりません: terraform/environments/*/*"
+if ! command -v terraform >/dev/null 2>&1; then
+  echo "ERROR: terraform コマンドが見つかりません" >&2
+  echo "  WSL2/Ubuntu: sudo apt install terraform" >&2
+  echo "  macOS      : brew install terraform" >&2
   exit 1
 fi
 
-echo -e "${B}Terraform 構文・型チェック${Z}"
-echo -e "対象: ${#ENV_DIRS[@]} environment"
-echo "───────────────────────────────────────────────────────"
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ERROR: jq コマンドが見つかりません (検証結果のパースに必要)" >&2
+  exit 1
+fi
 
-for dir in "${ENV_DIRS[@]}"; do
-  rel="$(realpath --relative-to="$REPO_ROOT" "$dir")"
-  printf "  %-50s " "$rel"
+KEYCLOAK_URL="${TF_VAR_keycloak_url:-https://keycloak.localtest.me}"
+if ! curl -sk -o /dev/null -w "%{http_code}" "${KEYCLOAK_URL}/realms/master/.well-known/openid-configuration" | grep -q "200"; then
+  echo "ERROR: ${KEYCLOAK_URL} に到達できません" >&2
+  echo "  事前に 'make up' で dev Keycloak を起動してください" >&2
+  exit 1
+fi
 
-  init_log="$(terraform -chdir="$dir" init -backend=false -input=false -no-color 2>&1)" || {
-    printf "${R}✗ init 失敗${Z}\n"
-    echo "$init_log" | sed 's/^/      /'
-    ((FAIL++)); continue
-  }
+cd "${TF_DIR}"
 
-  validate_log="$(terraform -chdir="$dir" validate -no-color 2>&1)" && {
-    printf "${G}✓${Z}\n"
-    ((PASS++))
-  } || {
-    printf "${R}✗${Z}\n"
-    echo "$validate_log" | sed 's/^/      /'
-    ((FAIL++))
-  }
-done
+if [ ! -f terraform.tfvars ]; then
+  echo "terraform.tfvars を生成します"
+  cp terraform.tfvars.example terraform.tfvars
+fi
 
-echo "───────────────────────────────────────────────────────"
-if [ "$FAIL" -eq 0 ]; then
-  echo -e "${G}${B}全 $((PASS + FAIL)) 環境 PASSED${Z}"
+trap 'echo "=== cleanup: terraform destroy ===" && terraform destroy -auto-approve >/dev/null 2>&1 || true' EXIT
+
+# --- apply ---
+
+echo "=== terraform init ==="
+terraform init -upgrade -no-color | tail -5
+
+echo ""
+echo "=== terraform apply ==="
+terraform apply -auto-approve -no-color | tail -10
+
+# --- validate: トークン取得 ---
+
+echo ""
+echo "=== validation: Direct Grant でトークン取得 ==="
+
+REALM=$(terraform output -raw realm_name)
+CLIENT_ID=$(terraform output -raw web_app_client_id)
+CLIENT_SECRET=$(terraform output -raw web_app_client_secret)
+USERNAME=$(terraform output -raw test_user_username)
+
+RESPONSE=$(curl -sk -X POST \
+  "${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token" \
+  -d "grant_type=password" \
+  -d "client_id=${CLIENT_ID}" \
+  -d "client_secret=${CLIENT_SECRET}" \
+  -d "username=${USERNAME}" \
+  -d "password=testpassword")
+
+if echo "${RESPONSE}" | jq -e '.access_token' >/dev/null 2>&1; then
+  echo "✓ Token issued for ${USERNAME}@${REALM}/${CLIENT_ID}"
 else
-  echo -e "${R}${B}${FAIL}/$((PASS + FAIL)) 環境 FAILED${Z}"
+  echo "✗ Token request FAILED" >&2
+  echo "${RESPONSE}" | jq . >&2 || echo "${RESPONSE}" >&2
   exit 1
 fi
+
+# --- validate: wrong-password で失敗確認 ---
+
+echo ""
+echo "=== validation: 間違ったパスワードで拒否されることを確認 ==="
+
+BAD_RESPONSE=$(curl -sk -X POST \
+  "${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token" \
+  -d "grant_type=password" \
+  -d "client_id=${CLIENT_ID}" \
+  -d "client_secret=${CLIENT_SECRET}" \
+  -d "username=${USERNAME}" \
+  -d "password=WRONG_PASSWORD")
+
+if echo "${BAD_RESPONSE}" | jq -e '.error == "invalid_grant"' >/dev/null 2>&1; then
+  echo "✓ Wrong password correctly rejected (invalid_grant)"
+else
+  echo "✗ Expected invalid_grant for wrong password, got:" >&2
+  echo "${BAD_RESPONSE}" | jq . >&2 || echo "${BAD_RESPONSE}" >&2
+  exit 1
+fi
+
+echo ""
+echo "=== ALL VALIDATIONS PASSED ==="
+echo "destroy は trap で自動実行されます"

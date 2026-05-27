@@ -1,0 +1,84 @@
+{
+  "realm": "test-browser",
+  "enabled": true,
+  "sslRequired": "none",
+  "verifyEmail": false,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "requiredCredentials": ["password"],
+  "users": [
+    {
+      "username": "alice",
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "eve",
+      "email": "eve@bad.com",
+      "firstName": "Eve",
+      "lastName": "Test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "requiredActions": []
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "test-browser-client",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:3000/*"],
+      "webOrigins": ["http://localhost:3000"],
+      "protocol": "openid-connect"
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "browser-with-domain-check",
+      "description": "Browser flow with Email Domain Allowlist after credentials",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-username-password-form",
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "email-domain-allowlist-authenticator",
+          "authenticatorConfig": "domain-check-example-com",
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "domain-check-example-com",
+      "config": {
+        "allowedDomains": "example.com"
+      }
+    }
+  ],
+  "browserFlow": "browser-with-domain-check"
+}

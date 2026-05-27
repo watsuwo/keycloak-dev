@@ -1,0 +1,88 @@
+{
+  "realm": "test-email-domain",
+  "enabled": true,
+  "sslRequired": "none",
+  "verifyEmail": false,
+  "registrationAllowed": false,
+  "requiredCredentials": ["password"],
+  "users": [
+    {
+      "username": "alice",
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "eve",
+      "email": "eve@bad.com",
+      "firstName": "Eve",
+      "lastName": "Test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "requiredActions": []
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "test-client",
+      "secret": "test-secret",
+      "enabled": true,
+      "publicClient": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect"
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "direct-grant-with-domain-check",
+      "description": "Direct Grant flow with Email Domain Allowlist",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "direct-grant-validate-username",
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "direct-grant-validate-password",
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "email-domain-allowlist-authenticator",
+          "authenticatorConfig": "domain-check-example-com",
+          "requirement": "REQUIRED",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "domain-check-example-com",
+      "config": {
+        "allowedDomains": "example.com"
+      }
+    }
+  ],
+  "directGrantFlow": "direct-grant-with-domain-check"
+}

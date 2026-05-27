@@ -1,4 +1,4 @@
-# providers/
+# keycloak/providers/
 
 Keycloakの **SPI拡張** (カスタムプロバイダー) を配置する。`compose.yaml` で `/opt/keycloak/providers/` にマウントされる。
 

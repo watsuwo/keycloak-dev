@@ -13,7 +13,7 @@ services:
     volumes:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
-      - ./certs:/certs:ro
+      - ./traefik/certs:/certs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - keycloak-net
@@ -69,9 +69,9 @@ services:
       KC_SPI_THEME_CACHE_THEMES: "false"
       KC_SPI_THEME_CACHE_TEMPLATES: "false"
     volumes:
-      - ./providers:/opt/keycloak/providers:ro
-      - ./themes:/opt/keycloak/themes:ro
-      - ./realms:/opt/keycloak/data/import:ro
+      - ./keycloak/providers:/opt/keycloak/providers:ro
+      - ./keycloak/themes:/opt/keycloak/themes:ro
+      - ./keycloak/realms:/opt/keycloak/data/import:ro
     ports:
       # mgmt(健康/メトリクス)のみ直接公開。HTTP(8080)はTraefik経由
       - "${KC_MGMT_PORT:-9000}:9000"
@@ -90,6 +90,50 @@ services:
       - "traefik.http.routers.keycloak.entrypoints=websecure"
       - "traefik.http.routers.keycloak.tls=true"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+    networks:
+      - keycloak-net
+    restart: unless-stopped
+
+  whoami:
+    image: traefik/whoami:latest
+    container_name: keycloak-whoami
+    networks:
+      - keycloak-net
+    restart: unless-stopped
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
+    container_name: keycloak-oauth2-proxy
+    command:
+      - --provider=keycloak-oidc
+      - --client-id=dev-client
+      - --client-secret=dev-client-secret
+      # ブラウザ向けはKeycloakの外部URL、サーバ間通信はdocker内部URLを使う
+      - --oidc-issuer-url=https://keycloak.${BASE_DOMAIN:-localtest.me}/realms/example-customer
+      - --skip-oidc-discovery=true
+      - --login-url=https://keycloak.${BASE_DOMAIN:-localtest.me}/realms/example-customer/protocol/openid-connect/auth
+      - --redeem-url=http://keycloak:8080/realms/example-customer/protocol/openid-connect/token
+      - --oidc-jwks-url=http://keycloak:8080/realms/example-customer/protocol/openid-connect/certs
+      - --logout-url=https://keycloak.${BASE_DOMAIN:-localtest.me}/realms/example-customer/protocol/openid-connect/logout
+      - --redirect-url=https://app.${BASE_DOMAIN:-localtest.me}/oauth2/callback
+      - --upstream=http://whoami:80
+      - --http-address=0.0.0.0:4180
+      # 開発用固定値 — 本番では必ず変更すること (16/24/32バイトのbase64値)
+      - --cookie-secret=MTIzNDU2Nzg5MDEyMzQ1Ng==
+      - --cookie-secure=true
+      - --email-domain=*
+      - --scope=openid profile email
+      - --skip-provider-button=true
+      - --insecure-oidc-skip-issuer-verification=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`app.${BASE_DOMAIN:-localtest.me}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.services.app.loadbalancer.server.port=4180"
+    depends_on:
+      keycloak:
+        condition: service_healthy
     networks:
       - keycloak-net
     restart: unless-stopped

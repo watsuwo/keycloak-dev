@@ -1,0 +1,119 @@
+{
+  "realm": "example-customer",
+  "enabled": true,
+  "displayName": "Example Customer",
+  "sslRequired": "none",
+  "loginWithEmailAllowed": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": false,
+  "duplicateEmailsAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "web-app",
+      "name": "Example Customer Web App",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000",
+        "access.token.lifespan": "300"
+      }
+    },
+    {
+      "clientId": "spa-frontend",
+      "name": "Example Customer SPA",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": true,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:3001/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3001",
+        "+"
+      ],
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3001",
+        "access.token.lifespan": "300"
+      }
+    },
+    {
+      "clientId": "batch-worker",
+      "name": "Example Customer Batch Worker",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": [
+        "openid"
+      ],
+      "attributes": {
+        "access.token.lifespan": "600"
+      }
+    },
+    {
+      "clientId": "dev-client",
+      "name": "Dev Demo Client (oauth2-proxy)",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "secret": "dev-client-secret",
+      "redirectUris": [
+        "https://app.localtest.me/oauth2/callback"
+      ],
+      "webOrigins": [
+        "https://app.localtest.me"
+      ],
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "https://app.localtest.me",
+        "access.token.lifespan": "300"
+      }
+    }
+  ]
+}
