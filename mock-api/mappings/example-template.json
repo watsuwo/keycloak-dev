@@ -1,0 +1,17 @@
+{
+  "name": "Example: GET /api/users/:id — response template (path parameter echo)",
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/users/([^/]+)"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{ \"id\": \"{{request.pathSegments.[2]}}\", \"name\": \"User {{request.pathSegments.[2]}}\", \"email\": \"user-{{request.pathSegments.[2]}}@example.com\", \"active\": true }",
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

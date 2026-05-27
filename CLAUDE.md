@@ -28,6 +28,8 @@ make logs   # Keycloakログを追う
 | --- | --- |
 | https://keycloak.localtest.me/ | Keycloak 管理コンソール (admin / admin) |
 | https://mailhog.localtest.me/ | Mailhog Web UI |
+| https://mock-api.localtest.me/ | WireMock モックAPIサーバ |
+| http://localhost:8082/__admin/ | WireMock 管理API (スタブ追加・リセット) |
 | http://localhost:9000/health/ready | Keycloak 健康チェック (直接) |
 | http://localhost:8081/dashboard/ | Traefik ダッシュボード |
 
@@ -48,6 +50,7 @@ make clean      # 停止 + DBボリューム削除 (完全クリーン)
 
 - `keycloak.${BASE_DOMAIN}` → Keycloak
 - `mailhog.${BASE_DOMAIN}` → Mailhog Web UI
+- `mock-api.${BASE_DOMAIN}` → WireMock モックAPIサーバ
 
 デフォルトは `localtest.me`。`*.localtest.me` は公開DNSで `127.0.0.1` に自動解決されるため `/etc/hosts` の編集は不要。
 
@@ -83,10 +86,14 @@ keycloak-dev/
 ├── traefik/                     # Traefik 設定 (静的 + 動的)
 ├── traefik/certs/                       # 自己署名証明書 (gitignore対象 / make certs で生成)
 ├── scripts/                     # 運用ヘルパー
+├── mock-api/                    # WireMock スタブ定義 (外部API モック)
+│   ├── mappings/                # スタブ定義 JSON (1ファイル = 1エンドポイント)
+│   └── __files/                 # 静的レスポンスボディファイル (bodyFileName で参照)
 ├── keycloak/providers/                   # SPI実装 (Java / Maven multi-module)
 │   ├── pom.xml                  # 親POM
 │   ├── CLAUDE.md                # SPI開発の流儀
-│   └── 0N-<pattern>/            # 各パターン (Authenticator/EventListener/etc.)
+│   ├── sample-NN-<pattern>/     # 汎用パターン (Authenticator/EventListener/etc.)
+│   └── case-<client>-<name>/   # 案件固有実装
 ├── keycloak/themes/                      # FreeMarker/CSS/JS — Phase 2.x で本格整備
 ├── keycloak/realms/                      # Realm JSON (起動時にimport) — Phase 2.x で本格整備
 ├── docs/                        # 業務プロセスドキュメント
@@ -108,7 +115,7 @@ keycloak-dev/
 
 | 層 | ディレクトリ | 守備範囲 | コマンド |
 | --- | --- | --- | --- |
-| 単体テスト | `keycloak/providers/0N-*/src/test/` | ロジック分岐 (Mockito) | `make test-providers` |
+| 単体テスト | `keycloak/providers/sample-*/src/test/` `case-*/src/test/` | ロジック分岐 (Mockito) | `make test-providers` |
 | Java IT | `keycloak/providers/integration-tests/` | Direct Grant等API挙動 | `make test-integration` |
 | ブラウザE2E | `e2e-tests/` | ブラウザ画面・Auth Code Flow・Themes | `make test-e2e` |
 
@@ -128,7 +135,10 @@ keycloak-dev/
 | 初回起動 | `make init && make up` |
 | Keycloakだけ再起動 | `make restart` |
 | Traefik再起動 (証明書再読込) | `make restart-traefik` |
-| ログ確認 | `make logs` / `make logs-traefik` / `make logs-all` |
+| モックAPI再起動 (mappings再読込) | `make restart-mock` |
+| モックAPIスタブをリセット | `make mock-reset` |
+| 有効スタブ一覧を表示 | `make mock-list` |
+| ログ確認 | `make logs` / `make logs-traefik` / `make logs-all` / `make logs-mock` |
 | DBに直接入る | `make psql` |
 | コンテナ内で操作 | `make shell` |
 | 証明書再生成 (BASE_DOMAIN変更時) | `make certs-regen && make restart-traefik` |
@@ -136,6 +146,20 @@ keycloak-dev/
 | SPI単体テスト | `make test-providers` |
 | SPIビルド成果物の削除 | `make clean-providers` |
 | バージョンアップ | `.env` のバージョン変更 → `make pull && make up` |
+
+### テスト
+
+| やりたいこと | 操作 | Keycloak 要否 |
+| --- | --- | --- |
+| Spec markdown の静的検証 | `make test-spec` | 不要 |
+| Terraform 構文・型チェック | `make test-tf` | 不要 |
+| Keycloak 設定値の検証 | `make test-kc` | 必要 |
+| OAuth フロー動作確認 | `make test-oauth` | 必要 |
+| 全テストまとめて実行 | `make test` | 必要 |
+
+`make test-kc` / `make test-oauth` は `make up && terraform apply` 後に実行する。  
+`KEYCLOAK_ENV=stg make test-kc` で stg 環境の設定値を検証できる。  
+batch-worker の Client Credentials テストは `KC_BATCH_WORKER_SECRET=xxx make test-oauth` で有効化。
 
 ## TLS / 証明書
 
@@ -224,10 +248,11 @@ docker run --rm -p 8080:8080 \
 
 - [x] **Phase 1** : 最小で動くdocker-compose基盤
 - [x] **Phase 1.5** : Traefik + 自己署名証明書でHTTPSアクセス
-- [x] **Phase 2.0** : パターン1個目 (Authenticator) + 要件テンプレ整備 ←いまここ
+- [x] **Phase 2.0** : パターン1個目 (Authenticator) + 要件テンプレ整備
 - [ ] **Phase 2.x** : パターンを順次拡充 (Authenticator追加 / EventListener / Theme / Realm JSON)
 - [ ] **Phase 3** : 自動テスト基盤 (Keycloak Testcontainers) + デプロイスクリプト
 - [ ] **Phase 4** : 雛形リポからのclone手順 + 案件レビュー観点リスト + 実案件適用
+- [x] **Phase G** : テスト自動化 (L1 spec検証・L2 terraform validate・L3 Admin API検証・L4 OAuthフロー確認)
 
 ## トラブルシューティング
 

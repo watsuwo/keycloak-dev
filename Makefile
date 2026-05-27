@@ -37,6 +37,10 @@ certs-regen: ## 証明書を強制再生成 (BASE_DOMAIN変更時)
 
 # --- 起動・停止 ---
 
+.PHONY: build
+build: ## カスタム Keycloak イメージをビルド (providers/themes を組み込み)
+	$(DC) build keycloak
+
 .PHONY: up
 up: .env certs ## 全サービスを起動 (バックグラウンド)
 	$(DC) up -d
@@ -53,6 +57,10 @@ restart: ## keycloakのみ再起動 (SPI/Theme再読み込み)
 restart-traefik: ## traefikのみ再起動 (証明書再読み込み)
 	$(DC) restart traefik
 
+.PHONY: restart-mock
+restart-mock: ## mock-apiのみ再起動 (mappings再読み込み)
+	$(DC) restart mock-api
+
 # --- 観察 ---
 
 .PHONY: logs
@@ -66,6 +74,10 @@ logs-traefik: ## traefikのログをfollow
 .PHONY: logs-all
 logs-all: ## 全サービスのログをfollow
 	$(DC) logs -f
+
+.PHONY: logs-mock
+logs-mock: ## mock-apiのログをfollow
+	$(DC) logs -f mock-api
 
 .PHONY: ps
 ps: ## サービス状態を表示
@@ -195,6 +207,18 @@ tf-destroy: ## Terraform で設定を削除
 tf-test: ## サンプル案件の apply → 検証 → destroy を一気に実行
 	bash scripts/test-terraform.sh
 
+# --- モックAPI ---
+
+MOCK_API_PORT ?= 8082
+
+.PHONY: mock-reset
+mock-reset: ## mock-api のスタブをファイルベース定義に戻す (実行時追加分をクリア)
+	curl -s -X POST http://localhost:$(MOCK_API_PORT)/__admin/mappings/reset | jq .
+
+.PHONY: mock-list
+mock-list: ## 現在有効なスタブ一覧を表示
+	curl -s http://localhost:$(MOCK_API_PORT)/__admin/mappings | jq '.mappings[] | {id, name: .name, method: .request.method, url: (.request.url // .request.urlPattern // .request.urlPathPattern)}'
+
 # --- メンテナンス ---
 
 .PHONY: clean
@@ -204,6 +228,28 @@ clean: ## 全サービス停止 + ボリューム削除 (DBデータも消える
 .PHONY: pull
 pull: ## イメージを最新に更新
 	$(DC) pull
+
+# --- テスト (Admin API / OAuth / Spec / Terraform) ---
+
+.PHONY: test
+test: test-spec test-tf test-kc test-oauth ## 全テストを実行 (spec → tf → kc → oauth)
+
+.PHONY: test-spec
+test-spec: ## Spec markdown の静的検証 (frontmatter・YAMLブロック確認)
+	@python3 scripts/test-spec.py
+
+.PHONY: test-tf
+test-tf: ## Terraform 構文チェック (全 environment、Keycloak 不要)
+	@command -v terraform >/dev/null 2>&1 || { echo "terraform CLI が必要: brew install terraform / apt install terraform"; exit 1; }
+	@bash scripts/test-tf-validate.sh
+
+.PHONY: test-kc
+test-kc: ## Keycloak設定値を自動検証 — spec と Admin API を突合 (terraform apply後に実行)
+	@python3 scripts/test-realm-config.py
+
+.PHONY: test-oauth
+test-oauth: ## OAuth フロー動作確認 (OIDC discovery・ROPC拒否・Client Credentials)
+	@python3 scripts/test-oauth-flows.py
 
 # --- Realm 入出力 (Phase 3で実装予定) ---
 

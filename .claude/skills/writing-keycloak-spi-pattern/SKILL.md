@@ -30,7 +30,7 @@ description: Use when adding a new Keycloak SPI pattern (Authenticator, EventLis
 
 ### 1. spec を書く (skill: writing-spec を利用)
 
-新規 PATTERN spec を `docs/specs/patterns/0N-<name>.md` に起票。
+新規 PATTERN spec を `docs/specs/patterns/NN-<name>.md` に起票。
 最初は `status: draft` で、acceptance_criteria だけ仮置き (該当パターン解説書の構造を真似る)。
 
 熟練者レビュー受けて `status: approved` に。
@@ -41,10 +41,14 @@ description: Use when adding a new Keycloak SPI pattern (Authenticator, EventLis
 
 ### 3. SPI モジュールを派生
 
-既存パターンを丸ごとコピー:
+最も近い `sample-` パターンを丸ごとコピー:
 
 ```bash
-cp -r keycloak/providers/01-email-domain-allowlist keycloak/providers/0N-<name>
+# 汎用パターンの場合
+cp -r keycloak/providers/sample-01-email-domain-allowlist keycloak/providers/sample-NN-<name>
+
+# 案件固有実装の場合
+cp -r keycloak/providers/sample-01-email-domain-allowlist keycloak/providers/case-<client>-<name>
 ```
 
 リネーム:
@@ -60,8 +64,9 @@ cp -r keycloak/providers/01-email-domain-allowlist keycloak/providers/0N-<name>
 
 ```xml
 <modules>
-  <module>01-email-domain-allowlist</module>
-  <module>0N-<name></module>
+  <module>sample-01-email-domain-allowlist</module>
+  <module>sample-NN-<name></module>  <!-- 汎用パターンの場合 -->
+  <!-- <module>case-<client>-<name></module> -->  <!-- 案件固有の場合 -->
 </modules>
 ```
 
@@ -103,21 +108,22 @@ make test-e2e
 
 ### 9. spec を implemented に昇格
 
-`docs/specs/patterns/0N-<name>.md` の frontmatter を:
+`docs/specs/patterns/NN-<name>.md` の frontmatter を:
 
 ```yaml
 status: implemented
 implementations:
-  - keycloak/providers/0N-<name>/
+  - keycloak/providers/sample-NN-<name>/   # 汎用パターンの場合
+  # - keycloak/providers/case-<client>-<name>/  # 案件固有の場合
 acceptance_tests:
-  - keycloak/providers/0N-<name>/src/test/
+  - keycloak/providers/sample-NN-<name>/src/test/
   - keycloak/providers/integration-tests/src/test/java/.../<Name>IT.java
   - e2e-tests/tests/<name>-browser.spec.ts   # E2E があれば
 ```
 
 ### 10. CLAUDE.md と ドキュメント整備
 
-- `keycloak/providers/0N-<name>/CLAUDE.md` でパターン解説
+- `keycloak/providers/sample-NN-<name>/CLAUDE.md` (または `case-<client>-<name>/CLAUDE.md`) でパターン解説
 - `keycloak/providers/CLAUDE.md` のパターン一覧表に新エントリ追加
 - (任意) README.md / specs/README.md のディレクトリ構成更新
 
@@ -152,7 +158,7 @@ make test-e2e                # ブラウザE2E (該当する場合)
 
 ## Checklist
 
-- [ ] spec 起票 (`docs/specs/patterns/0N-<name>.md`)
+- [ ] spec 起票 (`docs/specs/patterns/NN-<name>.md`)
 - [ ] パターン番号が連番
 - [ ] SPI モジュール作成 + Maven multi-module 設定済み (親POM `<modules>`)
 - [ ] Java パッケージ・クラス名リネーム済み

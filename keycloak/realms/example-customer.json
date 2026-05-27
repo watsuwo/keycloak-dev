@@ -87,6 +87,33 @@
       "attributes": {
         "access.token.lifespan": "600"
       }
+    },
+    {
+      "clientId": "dev-client",
+      "name": "Dev Demo Client (oauth2-proxy)",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "secret": "dev-client-secret",
+      "redirectUris": [
+        "https://app.localtest.me/oauth2/callback"
+      ],
+      "webOrigins": [
+        "https://app.localtest.me"
+      ],
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "https://app.localtest.me",
+        "access.token.lifespan": "300"
+      }
     }
   ]
 }

@@ -23,6 +23,8 @@
         <junit.version>5.10.2</junit.version>
         <!-- JDK 24/25対応のためには 5.15+ が必要 -->
         <mockito.version>5.18.0</mockito.version>
+        <!-- compose.yaml の WIREMOCK_VERSION と揃える -->
+        <wiremock.version>3.13.0</wiremock.version>
         <assertj.version>3.25.3</assertj.version>
         <testcontainers.version>1.19.7</testcontainers.version>
         <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
@@ -30,7 +32,7 @@
     </properties>
 
     <modules>
-        <module>01-email-domain-allowlist</module>
+        <module>sample-01-email-domain-allowlist</module>
         <module>integration-tests</module>
     </modules>
 
@@ -93,6 +95,14 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- 単体テスト: WireMock (外部HTTP APIのモック) -->
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
                 <scope>test</scope>
             </dependency>
 

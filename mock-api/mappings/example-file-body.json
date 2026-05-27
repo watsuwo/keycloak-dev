@@ -1,0 +1,14 @@
+{
+  "name": "Example: GET /api/catalog — response from file",
+  "request": {
+    "method": "GET",
+    "url": "/api/catalog"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "catalog.json"
+  }
+}
