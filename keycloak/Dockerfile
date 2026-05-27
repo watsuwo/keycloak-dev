@@ -17,7 +17,7 @@
 #     keycloak-custom:local start-dev
 
 ARG KEYCLOAK_VERSION=26.0
-ARG MAVEN_IMAGE=maven:3.9-eclipse-temurin-17
+ARG MAVEN_IMAGE=maven:3.9-eclipse-temurin-21
 
 # ====================================================================
 # Stage 1: SPI (Java) のビルド

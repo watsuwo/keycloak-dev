@@ -30,9 +30,9 @@ make build-restart     # 上記2つを一気に
 
 ## 前提ツール
 
-- **JDK 17以上** (Keycloak 26.x のSPIはJava 17でビルド可)
+- **JDK 21以上** (Keycloak 26.x のSPIはJava 21でビルド可)
 - **Maven 3.9以上**
-- WSL2の場合は `sudo apt install openjdk-17-jdk maven` 等で導入
+- WSL2の場合は `sudo apt install openjdk-21-jdk maven` 等で導入
 
 ## SPIの種類とExtension Point
 
