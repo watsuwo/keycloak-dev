@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "id": "item-001", "name": "Widget A", "price": 100 },
+    { "id": "item-002", "name": "Widget B", "price": 200 }
+  ]
+}

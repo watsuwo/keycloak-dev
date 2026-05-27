@@ -1,0 +1,26 @@
+{
+  "name": "Example: POST /api/example with body matching",
+  "request": {
+    "method": "POST",
+    "url": "/api/example",
+    "headers": {
+      "Content-Type": {
+        "contains": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.name"
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "created": true
+    }
+  }
+}

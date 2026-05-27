@@ -28,6 +28,8 @@ make logs   # Keycloakログを追う
 | --- | --- |
 | https://keycloak.localtest.me/ | Keycloak 管理コンソール (admin / admin) |
 | https://mailhog.localtest.me/ | Mailhog Web UI |
+| https://mock-api.localtest.me/ | WireMock モックAPIサーバ |
+| http://localhost:8082/__admin/ | WireMock 管理API (スタブ追加・リセット) |
 | http://localhost:9000/health/ready | Keycloak 健康チェック (直接) |
 | http://localhost:8081/dashboard/ | Traefik ダッシュボード |
 
@@ -48,6 +50,7 @@ make clean      # 停止 + DBボリューム削除 (完全クリーン)
 
 - `keycloak.${BASE_DOMAIN}` → Keycloak
 - `mailhog.${BASE_DOMAIN}` → Mailhog Web UI
+- `mock-api.${BASE_DOMAIN}` → WireMock モックAPIサーバ
 
 デフォルトは `localtest.me`。`*.localtest.me` は公開DNSで `127.0.0.1` に自動解決されるため `/etc/hosts` の編集は不要。
 
@@ -83,6 +86,9 @@ keycloak-dev/
 ├── traefik/                     # Traefik 設定 (静的 + 動的)
 ├── traefik/certs/                       # 自己署名証明書 (gitignore対象 / make certs で生成)
 ├── scripts/                     # 運用ヘルパー
+├── mock-api/                    # WireMock スタブ定義 (外部API モック)
+│   ├── mappings/                # スタブ定義 JSON (1ファイル = 1エンドポイント)
+│   └── __files/                 # 静的レスポンスボディファイル (bodyFileName で参照)
 ├── keycloak/providers/                   # SPI実装 (Java / Maven multi-module)
 │   ├── pom.xml                  # 親POM
 │   ├── CLAUDE.md                # SPI開発の流儀
@@ -129,7 +135,10 @@ keycloak-dev/
 | 初回起動 | `make init && make up` |
 | Keycloakだけ再起動 | `make restart` |
 | Traefik再起動 (証明書再読込) | `make restart-traefik` |
-| ログ確認 | `make logs` / `make logs-traefik` / `make logs-all` |
+| モックAPI再起動 (mappings再読込) | `make restart-mock` |
+| モックAPIスタブをリセット | `make mock-reset` |
+| 有効スタブ一覧を表示 | `make mock-list` |
+| ログ確認 | `make logs` / `make logs-traefik` / `make logs-all` / `make logs-mock` |
 | DBに直接入る | `make psql` |
 | コンテナ内で操作 | `make shell` |
 | 証明書再生成 (BASE_DOMAIN変更時) | `make certs-regen && make restart-traefik` |
