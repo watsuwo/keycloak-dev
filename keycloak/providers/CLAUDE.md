@@ -6,12 +6,13 @@
 
 ```
 keycloak/providers/
-├── pom.xml                          親POM (依存・プラグインバージョン管理)
-├── CLAUDE.md                        このファイル (SPI開発の流儀)
-├── 01-email-domain-allowlist/       パターン1: Authenticator (見本)
-├── 0N-...                           パターンを増やすときは番号付けで並列に配置
-├── integration-tests/                Java IT (実Keycloak起動でAPI検証)
-└── *.jar                            ビルド成果物 (make build-providers でコピーされる、gitignore対象)
+├── pom.xml                                親POM (依存・プラグインバージョン管理)
+├── CLAUDE.md                              このファイル (SPI開発の流儀)
+├── sample-01-email-domain-allowlist/      汎用パターン1: Authenticator (見本・派生元)
+├── sample-NN-...                          汎用パターンを増やすときは番号付けで並列に配置
+├── case-<client>-...                      案件固有実装はクライアント識別子プレフィックスで配置
+├── integration-tests/                     Java IT (実Keycloak起動でAPI検証)
+└── *.jar                                  ビルド成果物 (make build-providers でコピーされる、gitignore対象)
 ```
 
 各サブモジュールは独立したJARとしてビルドされ、`make build-providers` で `keycloak/providers/` 直下にコピーされる。Keycloakは `/opt/keycloak/providers/*.jar` を起動時に読み込む。
@@ -48,14 +49,20 @@ make build-restart     # 上記2つを一気に
 
 それぞれ `META-INF/services/<Factoryインタフェースの完全名>` に実装クラスを登録する。
 
-## 新しいパターンを追加する手順
+## 新しいモジュールを追加する手順
 
-1. `keycloak/providers/0N-<pattern-name>/` ディレクトリを作る (既存パターンを丸ごとコピーするのが早い)
+**汎用パターン** (雛形リポに残すもの):
+1. `keycloak/providers/sample-NN-<pattern-name>/` ディレクトリを作る (`sample-01-email-domain-allowlist` をコピーするのが早い)
+
+**案件固有実装** (クローン先リポで追加するもの):
+1. `keycloak/providers/case-<client>-<description>/` ディレクトリを作る (最も近い `sample-` をコピーして派生)
+
+共通手順:
 2. `pom.xml` の `<artifactId>` `<name>` を変更
 3. Javaパッケージ名を変更 (`com.example.keycloak.<spi-type>.<name>`)
 4. 親POMの `<modules>` に追加
 5. クラス実装 → テスト → CLAUDE.md (パターン解説) を整備
-6. `docs/specs/patterns/0N-<pattern-name>.md` にレシピを書く (パターンカタログ用)
+6. `docs/specs/patterns/NN-<pattern-name>.md` にレシピを書く (パターンカタログ用)
 7. `make build-restart` で動作確認
 
 ## バージョン整合
@@ -79,9 +86,16 @@ make build-restart     # 上記2つを一気に
 
 ## 命名規則
 
-- パッケージ: `com.example.keycloak.<spi-type>.<pattern-name>` (顧客リポでは `com.example` を会社/顧客のドメインに置換)
-- artifactId: ケバブケース (`email-domain-allowlist`)
-- ディレクトリ: `0N-<artifactId>` (Nは2桁の連番)
+| 種別 | ディレクトリ名 | 用途 |
+| --- | --- | --- |
+| 汎用パターン | `sample-NN-<pattern-name>` | 雛形リポに置く動く実例。案件実装の派生元 |
+| 案件固有実装 | `case-<client>-<description>` | クローン先リポで追加する顧客固有ロジック |
+
+- `NN`: 2桁連番 (01, 02, …)
+- `<pattern-name>` / `<description>`: ケバブケース
+- `<client>`: 顧客の短い識別子 (例: `acme`, `techcorp`)
+- パッケージ: `com.example.keycloak.<spi-type>.<pattern-name>` (顧客リポでは `com.example` を会社/顧客ドメインに置換)
+- artifactId: ケバブケース (ディレクトリ名からプレフィックスを除いたもの、例: `email-domain-allowlist`)
 
 ## 参考
 

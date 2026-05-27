@@ -108,7 +108,7 @@
 | **MDEP-187** | Maven dependency-plugin で reactor内 sibling JAR が package 前に参照できない既知問題 | [docs/testing.md](testing.md) "既知の罠" |
 | **User Profile 必須属性問題** | Keycloak 26.x で firstName/lastName が必須化されており、無いと Direct Grant が "Account is not fully set up" で詰む | 同上 |
 | **chrome-error 着地** | E2Eで存在しない URL (localhost:3000 等) への redirect で Chrome がエラーページに着地する現象 | 同上 |
-| **isDirectGrantFlow** | Authenticator が Direct Grant か Browser かを判別するヘルパー (フロー別Response出し分け用) | `keycloak/providers/01-email-domain-allowlist/src/main/java/.../EmailDomainAllowlistAuthenticator.java` |
+| **isDirectGrantFlow** | Authenticator が Direct Grant か Browser かを判別するヘルパー (フロー別Response出し分け用) | `keycloak/providers/sample-01-email-domain-allowlist/src/main/java/.../EmailDomainAllowlistAuthenticator.java` |
 
 ---
 

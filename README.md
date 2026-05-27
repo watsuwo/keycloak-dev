@@ -86,7 +86,7 @@ keycloak-dev/
 │   ├── providers/                       SPI (Java / Maven multi-module)
 │   │   ├── CLAUDE.md                    SPI開発の流儀
 │   │   ├── pom.xml                      親POM (依存・プラグイン管理)
-│   │   ├── 01-email-domain-allowlist/   ★パターン1: Authenticator サンプル
+│   │   ├── sample-01-email-domain-allowlist/   ★パターン1: Authenticator サンプル (派生元)
 │   │   └── integration-tests/           Java IT モジュール (Testcontainers + HTTP)
 │   ├── themes/                          FreeMarkerテンプレ + CSS/JS (Phase 2.x で本格整備)
 │   └── realms/                          起動時 import 用 Realm JSON (Phase 2.x で本格整備)
@@ -186,11 +186,11 @@ make init && make up
 
 ### B. SPIパターンを追加する
 
-1. `keycloak/providers/0N-<name>/` を既存パターンから複製
+1. `keycloak/providers/sample-NN-<name>/` (汎用) または `case-<client>-<name>/` (案件固有) を既存 `sample-` パターンから複製
 2. ロジック実装 + 単体テスト
 3. `keycloak/providers/integration-tests/` に `*IT.java` + テスト realm JSON 追加
 4. (画面UIあれば) `e2e-tests/tests/` に `*.spec.ts` 追加
-5. `docs/specs/patterns/0N-<name>.md` にレシピを書く
+5. `docs/specs/patterns/NN-<name>.md` にレシピを書く
 6. `make test-providers && make test-integration && make test-e2e` で全層検証
 
 詳細手順は [keycloak/providers/CLAUDE.md](keycloak/providers/CLAUDE.md)、テストの書き分けは [docs/testing.md](docs/testing.md)。

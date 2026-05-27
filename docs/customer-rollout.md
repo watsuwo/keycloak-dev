@@ -78,8 +78,8 @@ find providers -name "*.java" -o -name "pom.xml" \
   | xargs sed -i '' 's/com.example.keycloak/com.acme.keycloak/g'
 
 # ディレクトリリネーム
-mv keycloak/providers/01-email-domain-allowlist/src/main/java/com/example keycloak/providers/01-email-domain-allowlist/src/main/java/com/acme
-mv keycloak/providers/01-email-domain-allowlist/src/test/java/com/example keycloak/providers/01-email-domain-allowlist/src/test/java/com/acme
+mv keycloak/providers/sample-01-email-domain-allowlist/src/main/java/com/example keycloak/providers/sample-01-email-domain-allowlist/src/main/java/com/acme
+mv keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/example keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/acme
 # (テストも同様、IntelliJ等のリファクタ機能の方が安全)
 ```
 

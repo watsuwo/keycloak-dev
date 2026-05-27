@@ -8,7 +8,7 @@ description: Use when writing tests (unit, Java integration, or browser E2E) tha
 このプロジェクトの3層テスト構成 (単体 / Java IT / ブラウザE2E) で acceptance test を書く skill。
 spec の `acceptance_criteria` を verify する責務範囲。
 
-[docs/testing.md](../../../docs/testing.md) (3層 + 既知の罠の正本) と既存 [パターン1のテスト](../../../keycloak/providers/01-email-domain-allowlist/src/test/) を参照。
+[docs/testing.md](../../../docs/testing.md) (3層 + 既知の罠の正本) と既存 [パターン1のテスト](../../../keycloak/providers/sample-01-email-domain-allowlist/src/test/) を参照。
 
 ## When to Use
 

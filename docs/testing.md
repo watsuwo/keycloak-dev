@@ -52,12 +52,12 @@ keycloak/providers/0N-<pattern>/src/test/java/<package>/<ClassName>Test.java
 
 ```bash
 make test-providers          # 全モジュールの単体テスト
-cd keycloak/providers/01-email-domain-allowlist && mvn test    # 特定モジュールのみ
+cd keycloak/providers/sample-01-email-domain-allowlist && mvn test    # 特定モジュールのみ
 ```
 
 ### サンプル
 
-[keycloak/providers/01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java](../keycloak/providers/01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java)
+[keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java](../keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java)
 
 8ケースで以下を検証:
 - 許可ドメインのユーザーは `context.success()` が呼ばれる
