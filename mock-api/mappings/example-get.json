@@ -1,0 +1,17 @@
+{
+  "name": "Example: GET /api/example",
+  "request": {
+    "method": "GET",
+    "url": "/api/example"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "message": "Hello from mock API",
+      "status": "ok"
+    }
+  }
+}

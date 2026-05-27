@@ -138,6 +138,28 @@ services:
       - keycloak-net
     restart: unless-stopped
 
+  mock-api:
+    image: wiremock/wiremock:${WIREMOCK_VERSION:-3.13.0}
+    container_name: keycloak-mock-api
+    command:
+      - --global-response-templating   # 全スタブでテンプレート構文を有効化
+      - --verbose
+    volumes:
+      - ./mock-api/mappings:/home/wiremock/mappings:ro
+      - ./mock-api/__files:/home/wiremock/__files:ro
+    ports:
+      # /__admin/ (スタブ管理API) をホストから直接叩けるよう公開
+      - "${MOCK_API_PORT:-8082}:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mock-api.rule=Host(`mock-api.${BASE_DOMAIN:-localtest.me}`)"
+      - "traefik.http.routers.mock-api.entrypoints=websecure"
+      - "traefik.http.routers.mock-api.tls=true"
+      - "traefik.http.services.mock-api.loadbalancer.server.port=8080"
+    networks:
+      - keycloak-net
+    restart: unless-stopped
+
   mailhog:
     image: mailhog/mailhog:latest
     container_name: keycloak-mailhog

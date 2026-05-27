@@ -57,6 +57,10 @@ restart: ## keycloakのみ再起動 (SPI/Theme再読み込み)
 restart-traefik: ## traefikのみ再起動 (証明書再読み込み)
 	$(DC) restart traefik
 
+.PHONY: restart-mock
+restart-mock: ## mock-apiのみ再起動 (mappings再読み込み)
+	$(DC) restart mock-api
+
 # --- 観察 ---
 
 .PHONY: logs
@@ -70,6 +74,10 @@ logs-traefik: ## traefikのログをfollow
 .PHONY: logs-all
 logs-all: ## 全サービスのログをfollow
 	$(DC) logs -f
+
+.PHONY: logs-mock
+logs-mock: ## mock-apiのログをfollow
+	$(DC) logs -f mock-api
 
 .PHONY: ps
 ps: ## サービス状態を表示
@@ -198,6 +206,18 @@ tf-destroy: ## Terraform で設定を削除
 .PHONY: tf-test
 tf-test: ## サンプル案件の apply → 検証 → destroy を一気に実行
 	bash scripts/test-terraform.sh
+
+# --- モックAPI ---
+
+MOCK_API_PORT ?= 8082
+
+.PHONY: mock-reset
+mock-reset: ## mock-api のスタブをファイルベース定義に戻す (実行時追加分をクリア)
+	curl -s -X POST http://localhost:$(MOCK_API_PORT)/__admin/mappings/reset | jq .
+
+.PHONY: mock-list
+mock-list: ## 現在有効なスタブ一覧を表示
+	curl -s http://localhost:$(MOCK_API_PORT)/__admin/mappings | jq '.mappings[] | {id, name: .name, method: .request.method, url: (.request.url // .request.urlPattern // .request.urlPathPattern)}'
 
 # --- メンテナンス ---
 
