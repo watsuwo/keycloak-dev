@@ -19,7 +19,7 @@ implementations:
 ```yaml
 realm: example-customer
 enabled: true
-sslRequired: none              # devで HTTP 通信可能にする (本番は external)
+sslRequired: external          # Traefik が TLS 終端するため external が正しい
 loginWithEmailAllowed: true
 registrationAllowed: false
 resetPasswordAllowed: true

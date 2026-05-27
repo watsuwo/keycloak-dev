@@ -35,15 +35,13 @@ webOrigins: []
 defaultClientScopes:
   - openid
 
-attributes:
-  access.token.lifespan: "600"
 ```
 
 ## 設計判断
 
 - **service account 有効化** + **standardFlow 無効**: バッチはユーザー認証なし、Client Credentials Grant のみ
 - **redirectURIs 空**: ブラウザを介さない
-- **token lifespan 10分**: バッチ1回の実行時間 (典型) より長め
+- **token lifespan**: Realm デフォルト値を使用 (クライアント個別設定なし)
 
 ## 既知の限界 / 注意点
 

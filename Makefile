@@ -37,6 +37,10 @@ certs-regen: ## 証明書を強制再生成 (BASE_DOMAIN変更時)
 
 # --- 起動・停止 ---
 
+.PHONY: build
+build: ## カスタム Keycloak イメージをビルド (providers/themes を組み込み)
+	$(DC) build keycloak
+
 .PHONY: up
 up: .env certs ## 全サービスを起動 (バックグラウンド)
 	$(DC) up -d
@@ -90,6 +94,28 @@ clean: ## 全サービス停止 + ボリューム削除 (DBデータも消える
 .PHONY: pull
 pull: ## イメージを最新に更新
 	$(DC) pull
+
+# --- テスト ---
+
+.PHONY: test
+test: test-spec test-tf test-kc test-oauth ## 全テストを実行 (spec → tf → kc → oauth)
+
+.PHONY: test-spec
+test-spec: ## Spec markdown の静的検証 (frontmatter・YAMLブロック確認)
+	@python3 scripts/test-spec.py
+
+.PHONY: test-tf
+test-tf: ## Terraform 構文・型チェック (全 environment)
+	@command -v terraform >/dev/null 2>&1 || { echo "terraform CLI が必要: brew install terraform / apt install terraform"; exit 1; }
+	@bash scripts/test-terraform.sh
+
+.PHONY: test-kc
+test-kc: ## Keycloak設定値を自動検証 — spec と Admin API を突合 (terraform apply後に実行)
+	@python3 scripts/test-realm-config.py
+
+.PHONY: test-oauth
+test-oauth: ## OAuth フロー動作確認 (OIDC discovery・ROPC拒否・Client Credentials)
+	@python3 scripts/test-oauth-flows.py
 
 # --- 以下、Phase 3 で実装予定 ---
 
