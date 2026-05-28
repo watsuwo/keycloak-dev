@@ -3,9 +3,9 @@ spec_id: PATTERN-AUTH-DOMAIN-ALLOWLIST
 title: Email Domain Allowlist Authenticator
 status: implemented
 implementations:
-  - keycloak/providers/01-email-domain-allowlist/
+  - keycloak/providers/sample-01-email-domain-allowlist/
 acceptance_tests:
-  - keycloak/providers/01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java
+  - keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java
   - keycloak/providers/integration-tests/src/test/java/com/example/keycloak/it/EmailDomainAllowlistIT.java
   - e2e-tests/tests/email-domain-allowlist-browser.spec.ts
 ---
@@ -28,6 +28,45 @@ acceptance_tests:
 - ユーザー属性 (department等) での制限 → ProtocolMapper + Conditional Authenticator パターン
 - ワイルドカード `*.example.com` で網羅したい → 本パターンを拡張する
 
+## SPI要件
+
+`writing-keycloak-spi-pattern` スキルがこのブロックを読み込み、Javaコード・テスト・META-INF登録を生成する。
+
+```yaml
+requirements:
+  spi_type: Authenticator
+  provider_id: email-domain-allowlist-authenticator
+  display_name: Email Domain Allowlist
+  reference_category: domain-restriction
+  help_text: "ユーザーのメールアドレスのドメインが許可リストに含まれる場合のみログインを許可します。Username/Password等のユーザー特定ステップの後段に配置してください。"
+  requirement_choices: [REQUIRED, DISABLED]
+  requires_user: true
+  config:
+    - key: allowedDomains
+      label: "許可するドメイン"
+      type: MULTIVALUED_STRING
+      help: "ログインを許可するメールドメイン (例: example.com)。空の場合は制限なし。"
+  flows:
+    browser: true
+    direct_grant: true
+  acceptance_criteria:
+    - id: AC-1
+      when: "ユーザーのメールドメインがallowedDomainsのいずれかに一致する (大小文字無視)"
+      then: "context.success() — 認証通過"
+    - id: AC-2
+      when: "ユーザーのメールドメインがallowedDomainsのいずれにも一致しない"
+      then: "context.failure(ACCESS_DENIED, errorResponse) — ログイン拒否"
+    - id: AC-3
+      when: "allowedDomainsが空 (設定なし、または空文字)"
+      then: "context.success() — 制限なし"
+    - id: AC-4
+      when: "userがnull (前段で未解決)"
+      then: "context.attempted() — 判定スキップ"
+    - id: AC-5
+      when: "userのemailがnullまたは@を含まない"
+      then: "context.failure(INVALID_USER, errorResponse)"
+```
+
 ## 仕様
 
 - 設定: `allowedDomains` (複数指定可、`##` 区切り保存)
@@ -48,10 +87,10 @@ acceptance_tests:
 
 ## 実装の場所
 
-- ソース: [keycloak/providers/01-email-domain-allowlist/](../../../keycloak/providers/01-email-domain-allowlist/)
-- Authenticator: [EmailDomainAllowlistAuthenticator.java](../../../keycloak/providers/01-email-domain-allowlist/src/main/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticator.java)
-- Factory: [EmailDomainAllowlistAuthenticatorFactory.java](../../../keycloak/providers/01-email-domain-allowlist/src/main/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorFactory.java)
-- テスト: [EmailDomainAllowlistAuthenticatorTest.java](../../../keycloak/providers/01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java)
+- ソース: [keycloak/providers/sample-01-email-domain-allowlist/](../../../keycloak/providers/sample-01-email-domain-allowlist/)
+- Authenticator: [EmailDomainAllowlistAuthenticator.java](../../../keycloak/providers/sample-01-email-domain-allowlist/src/main/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticator.java)
+- Factory: [EmailDomainAllowlistAuthenticatorFactory.java](../../../keycloak/providers/sample-01-email-domain-allowlist/src/main/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorFactory.java)
+- テスト: [EmailDomainAllowlistAuthenticatorTest.java](../../../keycloak/providers/sample-01-email-domain-allowlist/src/test/java/com/example/keycloak/authenticators/emaildomain/EmailDomainAllowlistAuthenticatorTest.java)
 
 ## 派生・カスタマイズ
 
