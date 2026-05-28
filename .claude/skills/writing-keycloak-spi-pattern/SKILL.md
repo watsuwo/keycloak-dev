@@ -5,43 +5,44 @@ description: Use when adding a new Keycloak SPI pattern (Authenticator, EventLis
 
 # Writing Keycloak SPI Pattern
 
-新しい Keycloak SPI パターン (Authenticator / EventListener / ProtocolMapper / UserStorage / RequiredAction 等) をこのリポに追加する手順。
+PATTERN spec の `requirements:` YAML ブロックを読み込み、Javaコード・テスト・META-INF登録・Maven module を生成する skill。
+spec には「何が必要か」だけを書き、内部実装はこの skill が決定する。
 
-このプロジェクトでは **パターン = 動く実例 + spec + 3層テスト + ドキュメント** がワンセット。
+## When to Use
 
-## When to use
-
+- PATTERN spec (`docs/specs/patterns/NN-<name>.md`) に `requirements:` ブロックが書かれているとき
 - 既存パターンを派生では足りず、新しい SPI 種別/挙動を追加したいとき
 - 顧客案件で生まれた汎用ロジックを雛形リポに逆輸入するとき
 
-## When NOT to use
+## When NOT to Use
 
-- 既存パターンを「設定値だけ変えて使う」ケース (既存パターンを `realm config` で利用する)
-- Theme カスタマイズ (それは `keycloak/themes/` 配下)
-- 管理コンソール設定 (それは `terraform/` 配下、別 skill: `writing-keycloak-realm-terraform`)
+- 既存パターンを「設定値だけ変えて使う」ケース (auth-flow spec の `patterns[].config` で対応)
+- Theme カスタマイズ (`keycloak/themes/` 配下)
+- 管理コンソール設定 (`terraform/` 配下、別 skill: `writing-keycloak-realm-terraform`)
 
-## 前提知識
+## Prerequisites
 
-- [docs/glossary.md](../../../docs/glossary.md) で SPI種別 と Factory I/F を理解
-- [keycloak/providers/CLAUDE.md](../../../keycloak/providers/CLAUDE.md) で Maven multi-module 流儀
-- [docs/specs/patterns/01-email-domain-allowlist.md](../../../docs/specs/patterns/01-email-domain-allowlist.md) で既存パターン1
+- [ ] PATTERN spec が `docs/specs/patterns/NN-<name>.md` に存在する
+- [ ] spec の `requirements:` YAML ブロックに `spi_type`, `provider_id`, `display_name`, `acceptance_criteria` が埋まっている
+- [ ] パターン番号が連番 (既存最大 + 1)
 
-## 手順 (TDD ベース)
+---
 
-### 1. spec を書く (skill: writing-spec を利用)
+## Workflow (Spec-driven)
 
-新規 PATTERN spec を `docs/specs/patterns/NN-<name>.md` に起票。
-最初は `status: draft` で、acceptance_criteria だけ仮置き (該当パターン解説書の構造を真似る)。
+### Step 1: spec 読み込み
 
-熟練者レビュー受けて `status: approved` に。
+PATTERN spec ファイルを読む。`requirements:` YAML ブロックから以下を把握する:
 
-### 2. パターン番号を確定
+- `spi_type` → Java インタフェース・META-INF キー (下記マッピング表参照)
+- `provider_id` → `Factory.ID` 定数の値
+- `display_name` → `getDisplayType()` の戻り値
+- `config` → `getConfigProperties()` の内容
+- `acceptance_criteria` → 単体テストのテストメソッド構成
 
-`docs/specs/patterns/` の最大番号 +1 を採用。例: 既存が 01 → 新規は `02-<name>`。
+### Step 2: Maven モジュール作成
 
-### 3. SPI モジュールを派生
-
-最も近い `sample-` パターンを丸ごとコピー:
+既存の `sample-01-email-domain-allowlist` をコピーして派生する:
 
 ```bash
 # 汎用パターンの場合
@@ -51,132 +52,188 @@ cp -r keycloak/providers/sample-01-email-domain-allowlist keycloak/providers/sam
 cp -r keycloak/providers/sample-01-email-domain-allowlist keycloak/providers/case-<client>-<name>
 ```
 
-リネーム:
-- `pom.xml` の `<artifactId>` / `<name>`
-- Java パッケージ `com.example.keycloak.<spi-type>.<name>`
-- クラス名 `<Name>` / `<Name>Factory`
-- `Factory.ID` 定数 (kebab-case)
-- `src/main/resources/META-INF/services/<Factoryインタフェース完全名>` の中身を新Factory FQCNに
+`pom.xml` を更新:
+- `<artifactId>` → ディレクトリ名からプレフィックスを除いたもの (例: `ip-allowlist`)
+- `<name>` → 人間向け名前
 
-### 4. 親POM に追加
+親 POM (`keycloak/providers/pom.xml`) の `<modules>` に追加。
 
-`keycloak/providers/pom.xml` の `<modules>` に新モジュール名を追加:
+### Step 3: Java パッケージ・クラス生成
 
-```xml
-<modules>
-  <module>sample-01-email-domain-allowlist</module>
-  <module>sample-NN-<name></module>  <!-- 汎用パターンの場合 -->
-  <!-- <module>case-<client>-<name></module> -->  <!-- 案件固有の場合 -->
-</modules>
+**パッケージ命名**:
+
+| spi_type | パッケージ | 主クラス名 | Factory クラス名 |
+|---|---|---|---|
+| Authenticator | `com.example.keycloak.authenticators.<name>` | `<Name>Authenticator` | `<Name>AuthenticatorFactory` |
+| EventListener | `com.example.keycloak.listeners.<name>` | `<Name>EventListenerProvider` | `<Name>EventListenerProviderFactory` |
+| ProtocolMapper | `com.example.keycloak.mappers.<name>` | `<Name>ProtocolMapper` | (Factory 統合、`AbstractOIDCProtocolMapper` 継承) |
+| UserStorage | `com.example.keycloak.storage.<name>` | `<Name>UserStorageProvider` | `<Name>UserStorageProviderFactory` |
+| RequiredAction | `com.example.keycloak.actions.<name>` | `<Name>RequiredActionProvider` | `<Name>RequiredActionFactory` |
+
+`<name>` は `provider_id` の kebab-case をキャメルケース化したもの (例: `ip-allowlist` → `IpAllowlist`)。
+
+**Factory クラス生成** (`<Name>Factory.java`):
+
+`requirements.config` の各エントリを `ProviderConfigProperty` に変換する:
+
+| YAML `type` | Java 定数 | 補足 |
+|---|---|---|
+| `STRING` | `ProviderConfigProperty.STRING_TYPE` | — |
+| `MULTIVALUED_STRING` | `ProviderConfigProperty.MULTIVALUED_STRING_TYPE` | 値は `##` 区切りで保存 |
+| `PASSWORD` | `ProviderConfigProperty.PASSWORD` | マスク表示 |
+| `BOOLEAN` | `ProviderConfigProperty.BOOLEAN_TYPE` | — |
+| `LIST` | `ProviderConfigProperty.LIST_TYPE` | `options` も設定 |
+| `ROLE` | `ProviderConfigProperty.ROLE_TYPE` | — |
+| `CLIENT` | `ProviderConfigProperty.CLIENT_LIST_TYPE` | — |
+
+`config` が空のとき → `isConfigurable() = false`、`getConfigProperties()` は空リストを返す。
+
+`requirements.requirement_choices` が指定されている場合、その配列を `getRequirementChoices()` に使用。
+省略時は `[REQUIRED, OPTIONAL, DISABLED]`。
+
+**主クラス生成** (`<Name>.java`):
+
+`spi_type: Authenticator` の場合:
+- `requirements_user: true` → `requiresUser()` が `true` を返す
+- `authenticate()` の先頭で `context.getUser() == null` チェック
+- `acceptance_criteria` を見て条件分岐と `context.success()` / `context.failure()` / `context.attempted()` の呼び分けを実装
+- **Direct Grant 対応** (必須): `context.failure(error, response)` の `response` はフロー種別で出し分ける (後述)
+
+`MULTIVALUED_STRING` の読み取り:
+```java
+String raw = config.getConfig().get(CONFIG_KEY);
+if (raw == null || raw.isBlank()) return List.of();
+return Arrays.asList(raw.split("##"));
 ```
 
-### 5. 単体テストを先に書く (RED)
+### Step 4: META-INF/services 登録
 
-`src/test/java/.../<Name>Test.java` でロジック分岐の期待挙動を Mockito で記述。
-最初は実装が空なので失敗 (RED)。
+`src/main/resources/META-INF/services/<META-INF キー>` に Factory の FQCN を1行で記述。
 
-### 6. ロジック実装 (GREEN)
+| spi_type | META-INF キー |
+|---|---|
+| Authenticator | `org.keycloak.authentication.AuthenticatorFactory` |
+| EventListener | `org.keycloak.events.EventListenerProviderFactory` |
+| ProtocolMapper | `org.keycloak.protocol.ProtocolMapper` |
+| UserStorage | `org.keycloak.storage.UserStorageProviderFactory` |
+| RequiredAction | `org.keycloak.authentication.RequiredActionFactory` |
 
-`<Name>.java` の `authenticate()` / `onEvent()` / 該当メソッドを実装。
-**Direct Grant 対応**: 失敗時は `context.failure(error, response)` の `response` を **フロー種別に応じて出し分け**。
-`isDirectGrantFlow()` ヘルパーをコピー (パターン1の実装参考)。
+### Step 5: 単体テスト生成
 
-```bash
-make test-providers  # 単体テスト green になることを確認
+`acceptance_criteria` の各 AC を1テストメソッドにマッピングする:
+
+```java
+// AC-1 の例
+@Test
+void ac1_<camelCase(when)>() {
+    // Arrange: "when" の条件をモックで再現
+    // Act: authenticator.authenticate(context)
+    // Assert: "then" の検証 (verify(context).success() 等)
+}
 ```
 
-### 7. Java IT 追加
+`AuthenticationFlowContext` は `mock(AuthenticationFlowContext.class, RETURNS_DEEP_STUBS)` で作成
+(`errorResponse()` 内の `context.form()` チェーンがあるため深いスタブが必要)。
 
-`keycloak/providers/integration-tests/src/test/java/.../<Name>IT.java` を書く。
-
-テスト realm JSON も `src/test/resources/test-realm-<name>.json` で用意。
-**罠回避**: user に `firstName` / `lastName` / `emailVerified: true` / `requiredActions: []` を必ず設定。
-
-```bash
-make test-integration  # 実Keycloakでgreenになることを確認
-```
-
-### 8. (ブラウザUIあれば) E2E 追加
-
-`e2e-tests/tests/<name>-browser.spec.ts` と `e2e-tests/fixtures/test-realm-<name>.json`。
-
-OAuth redirect 検証は `page.waitForRequest(req => req.url().startsWith(REDIRECT_URI))` パターン。
-
-```bash
-make test-e2e
-```
-
-### 9. spec を implemented に昇格
-
-`docs/specs/patterns/NN-<name>.md` の frontmatter を:
+### Step 6: spec frontmatter 更新
 
 ```yaml
 status: implemented
 implementations:
-  - keycloak/providers/sample-NN-<name>/   # 汎用パターンの場合
-  # - keycloak/providers/case-<client>-<name>/  # 案件固有の場合
+  - keycloak/providers/sample-NN-<name>/
 acceptance_tests:
   - keycloak/providers/sample-NN-<name>/src/test/
   - keycloak/providers/integration-tests/src/test/java/.../<Name>IT.java
   - e2e-tests/tests/<name>-browser.spec.ts   # E2E があれば
 ```
 
-### 10. CLAUDE.md と ドキュメント整備
+### Step 7: CLAUDE.md 整備
 
-- `keycloak/providers/sample-NN-<name>/CLAUDE.md` (または `case-<client>-<name>/CLAUDE.md`) でパターン解説
+- `keycloak/providers/sample-NN-<name>/CLAUDE.md` (パターン解説、フロー配置の注意点)
 - `keycloak/providers/CLAUDE.md` のパターン一覧表に新エントリ追加
-- (任意) README.md / specs/README.md のディレクトリ構成更新
 
-### 11. 検証 + コミット
+### Step 8: 検証
 
 ```bash
-make spec-validate           # spec frontmatter 検証
-make test-providers          # 単体
-make test-integration        # Java IT
-make test-e2e                # ブラウザE2E (該当する場合)
+make spec-validate       # spec frontmatter 検証
+make test-providers      # 単体テスト
+make test-integration    # Java IT (Docker 必要)
 ```
 
-すべて green を確認、PR 作成。レビュー観点は [docs/review-checklists/spi-review.md](../../../docs/review-checklists/spi-review.md) 参照。
+---
 
-## superpowers との連携
+## Direct Grant 対応 (必須)
 
-- **brainstorming** : spec の draft を refine
-- **writing-plans** : この skill の手順 1-11 を 2-5分タスクに分解
-- **executing-plans + subagent-driven-development** : 各タスクを subagent dispatch
-- **test-driven-development** : Step 5 (RED) → Step 6 (GREEN) → Step 7 RED → IT GREEN
-- **requesting-code-review** : Step 11 の検証通過後、PR レビュー依頼
+`context.failure(error)` を単独で呼ぶと Direct Grant フローで **500** が返る。
+`context.failure(error, response)` と必ずレスポンスを渡すこと。
+
+レスポンスはフロー種別で出し分ける:
+
+```java
+private static Response errorResponse(AuthenticationFlowContext context,
+                                      String oauthError, String description) {
+    if (isDirectGrantFlow(context)) {
+        OAuth2ErrorRepresentation err = new OAuth2ErrorRepresentation(oauthError, description);
+        return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(err).type(MediaType.APPLICATION_JSON_TYPE).build();
+    }
+    return context.form().setError(description).createErrorPage(Response.Status.FORBIDDEN);
+}
+
+private static boolean isDirectGrantFlow(AuthenticationFlowContext context) {
+    AuthenticationExecutionModel exec = context.getExecution();
+    if (exec == null || exec.getParentFlow() == null) return false;
+    AuthenticationFlowModel flow = context.getRealm().getDirectGrantFlow();
+    return flow != null && flow.getId().equals(exec.getParentFlow());
+}
+```
+
+`requirements.flows.direct_grant: true` のパターンは必ずこのヘルパーを含める。
+
+---
+
+## auth-flow spec との連携
+
+`writing-keycloak-auth-flow` スキルは `patterns[].spec_id` が指す PATTERN spec を読み、
+`requirements.provider_id` を Realm JSON の `authenticator` フィールドに使用する。
+
+auth-flow spec に新パターンを追加するには:
+1. PATTERN spec を `status: implemented` にする
+2. auth-flow spec の `patterns:` に `spec_id` と `config` を追加
+
+---
 
 ## Anti-patterns
 
-- ❌ パターン番号を skip (例: 01 → 03) — 既存最大+1 を厳守
+- ❌ パターン番号を skip (既存最大 + 1 を厳守)
 - ❌ Java パッケージ名を変えずに既存パターンの clone を作る (クラス衝突)
-- ❌ `META-INF/services/` の中身を Factory のリネームに合わせて更新し忘れ (SPI が読まれない)
+- ❌ `META-INF/services/` の中身を Factory リネームに合わせ忘れ (SPI が読まれない)
 - ❌ `context.failure(error)` 単独呼び出し (Direct Grant で 500)
 - ❌ テスト realm の user に firstName/lastName を入れ忘れ ("Account is not fully set up")
-- ❌ spec を後付けで書く (実装後に implementations 埋める=可、ただし draft → approved → implemented の流れは省略しない)
-- ❌ E2E 不要なパターン (フォーム表示なし) で無理に E2E 書く
+- ❌ `spec: draft` のまま実装する (draft → approved → implemented の順を省略しない)
 
 ## Checklist
 
-- [ ] spec 起票 (`docs/specs/patterns/NN-<name>.md`)
+- [ ] PATTERN spec の `requirements:` ブロックが埋まっている
 - [ ] パターン番号が連番
-- [ ] SPI モジュール作成 + Maven multi-module 設定済み (親POM `<modules>`)
-- [ ] Java パッケージ・クラス名リネーム済み
+- [ ] Maven module 作成 + 親 POM の `<modules>` に追加
+- [ ] Java パッケージ・クラス名が規約通り
 - [ ] `META-INF/services/` 登録済み
-- [ ] 単体テスト green
-- [ ] Java IT green (test realm JSON の User Profile 罠回避済み)
-- [ ] (該当時) E2E green
+- [ ] Factory の `getConfigProperties()` が `config` ブロックと一致
+- [ ] Direct Grant 対応 (`flows.direct_grant: true` のとき必須)
+- [ ] 単体テストが `acceptance_criteria` をカバーしている
 - [ ] spec の `status: implemented` + implementations + acceptance_tests 列挙
-- [ ] CLAUDE.md (パターン個別 + providers全体)
+- [ ] CLAUDE.md (パターン個別 + providers 全体)
 - [ ] `make spec-validate` green
 
-## Related skills
+## Related Skills
 
 - `writing-spec` — spec 起票時に併用
-- `writing-keycloak-acceptance-tests` — 3層テストの具体的な書き方
+- `writing-keycloak-auth-flow` — このパターンを auth flow に組み込む
+- `writing-keycloak-acceptance-tests` — Java IT / E2E の詳細
 
-## Related docs
+## Related Docs
 
+- [docs/specs/templates/spi-pattern-template.md](../../../docs/specs/templates/spi-pattern-template.md) — spec テンプレ (requirements YAML スキーマの正典)
 - [keycloak/providers/CLAUDE.md](../../../keycloak/providers/CLAUDE.md) — SPI開発の流儀
 - [docs/testing.md](../../../docs/testing.md) — 3層テスト戦略・既知の罠
-- [docs/review-checklists/spi-review.md](../../../docs/review-checklists/spi-review.md) — レビュー観点
