@@ -1,7 +1,13 @@
 ---
 spec_id: TEMPLATE-TASK-ADMIN-CONSOLE
-title: 管理コンソール設定 task-spec テンプレ
-status: template
+title: 管理コンソール設定 task-spec テンプレ (非推奨)
+status: deprecated
+---
+
+> **⚠️ このファイルは deprecated です。**
+> 代わりに [`docs/specs/task-specs/admin-console-config/`](admin-console-config/) のテンプレを使用してください。
+> デフォルト値付きでカテゴリごとに分割されています。
+
 ---
 
 # Task Spec: 管理コンソール設定 — テンプレート
