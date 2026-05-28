@@ -23,7 +23,8 @@ IdP が複数ある場合は「## IdP 設定」セクションを複製してく
 | Issuer URL (OIDC) | *(入力必須。SAML の場合は不要)* | — | `extra_config.issuer` |
 | メタデータ URL (SAML) | *(入力必須。OIDC の場合は不要)* | — | `extra_config.metadataDescriptorUrl` |
 | 初回ログイン時のフロー | `first broker login` | 既存ユーザーと自動紐づけが必要 → `detect existing broker user` | `first_broker_login_flow_alias` |
-| ユーザー自動作成 | `true` | IdP 認証済みユーザーのみ受け入れる → `false` + 手動プロビジョニング | `store_token` |
+| トークン保存 (Store Tokens) | `false` | IdP の Access Token を Keycloak に保存したい場合 → `true` | `store_token` |
+| ユーザー自動作成 | `true` (first broker login flow で制御) | 既存ユーザーのみ受け入れる → first broker login flow を変更 | (first_broker_login_flow_alias で制御) |
 
 ## 属性マッピング
 

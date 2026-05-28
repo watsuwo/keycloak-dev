@@ -53,3 +53,9 @@ status: template
 | SSO Session Max Lifespan | `36000` (10時間) | 金融/医療 → `3600` (1時間) 以下を推奨 | `sso_session_max_lifespan` |
 | Offline Session Idle | `2592000` (30日) | セキュリティ要件に応じて短縮 | `offline_session_idle_timeout` |
 | Offline Session Max | `5184000` (60日) | — | `offline_session_max_lifespan` |
+
+## 設計判断メモ (案件ごとに記入)
+
+- **SSL 要件の選択**: (例: external を選んだ理由、または変更した場合の理由)
+- **パスワードポリシーの強度**: (例: 規制業界要件に合わせて最小長を変更した場合の理由)
+- **セッション期限の設定**: (例: UX とセキュリティのバランスで SSO Session Max を変更した場合の理由)
