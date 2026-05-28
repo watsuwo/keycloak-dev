@@ -9,6 +9,8 @@
 | [writing-spec](writing-spec/SKILL.md) | 新規 spec ファイル (PATTERN-/TEMPLATE-/CASE-/TASK-) の起票・更新。frontmatter 規約と spec_id 命名の保証 |
 | [writing-keycloak-spi-pattern](writing-keycloak-spi-pattern/SKILL.md) | 新 SPI 実装 (Authenticator/EventListener等)。 0N-<name> ディレクトリ・Maven module・META-INF/services・3層テスト・spec frontmatter 更新まで一通り |
 | [writing-keycloak-realm-terraform](writing-keycloak-realm-terraform/SKILL.md) | task-spec → Terraform HCL の起こし。Realm/Client/Role/IdP/SMTP の HCL 規約 + `keycloak/keycloak` provider 利用 |
+| [writing-keycloak-realm-json](writing-keycloak-realm-json/SKILL.md) | case spec (CLIENTS-INDEX + CLIENT-*) → `keycloak/realms/<案件>.json` 生成・更新 |
+| [writing-keycloak-auth-flow](writing-keycloak-auth-flow/SKILL.md) | auth-flow spec の YAML ブロック → Realm JSON の `authenticationFlows` + Terraform 生成・更新 |
 | [writing-keycloak-acceptance-tests](writing-keycloak-acceptance-tests/SKILL.md) | spec の acceptance_criteria を3層 (単体/Java IT/E2E) で verify する手順。既知の罠 (User Profile必須属性・OAuth redirect等) 回避 |
 
 ## superpowers との関係
